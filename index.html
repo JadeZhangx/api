@@ -3,22 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Events Finder</title>
+    <title>Music Events</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
 </head>
 <body>
-    <h1>Music Events Finder</h1>
-    <form id="searchForm">
-        <label for="genre">Genre:</label>
-        <input type="text" id="genre" name="genre" placeholder="e.g., rock, jazz"><br><br>
-        <label for="date">Date:</label>
-        <input type="date" id="date" name="date"><br><br>
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city" placeholder="City name"><br><br>
-        <button type="button" onclick="fetchEvents()">Search</button>
-    </form>
-    <h2>Results:</h2>
-    <div id="results"></div>
+    <div class="page-wrapper">
+        <nav class="main-nav">
+            <div class="nav-container">
+                <div class="logo">MUSIC EVENTS</div>
+                <div class="nav-links">
+                    <a href="#" class="active" data-view="events">Events</a>
+                    <a href="#" data-view="venues">Venues</a>
+                    <a href="#" data-view="artists">Artists</a>
+                </div>
+            </div>
+        </nav>
+
+        <header>
+            <div class="hero-container">
+                <h1>Discover Live Music Events</h1>
+                <p class="subtitle">Find the best concerts and performances in your area</p>
+            </div>
+        </header>
+
+        <main>
+            <div id="eventsView">
+                <!-- Search Container -->
+                <div class="search-container">
+                    <form class="search-form" id="searchForm">
+                        <div class="search-grid">
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" placeholder="Enter city name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="genre">Genre</label>
+                                <select id="genre">
+                                    <option value="">All Genres</option>
+                                    <option value="KnvZfZ7vAvF">EDM/Techno</option>
+                                    <option value="KnvZfZ7vAvv">Alternative</option>
+                                    <option value="KnvZfZ7vAve">Pop</option>
+                                    <option value="KnvZfZ7vAv1">Hip-Hop/Rap</option>
+                                    <option value="KnvZfZ7vAeJ">Rock</option>
+                                    <option value="KnvZfZ7vAv6">Country</option>
+                                    <option value="KnvZfZ7vAv2">R&B</option>
+                                    <option value="KnvZfZ7vAvd">Blues</option>
+                                    <option value="KnvZfZ7vAJ6">Latin</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="eventDate">Date</label>
+                                <input type="date" id="eventDate">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Filter Container -->
+                <div id="filterContainer" class="filter-container" style="display: none;">
+                    <div class="filter-wrapper">
+                        <div class="filter-header">
+                            <h3>Filter Results</h3>
+                            <div class="filter-count">0 events found</div>
+                        </div>
+                        
+                        <div class="filter-grid">
+                            <div class="filter-group">
+                                <label>Sort By</label>
+                                <select id="sortFilter">
+                                    <option value="popularity">Popularity</option>
+                                    <option value="date">Date</option>
+                                    <option value="name">Name</option>
+                                    <option value="price">Price</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>Ticket Availability</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="availableOnly" value="available">
+                                        Available tickets only
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="onSale" value="onSale">
+                                        On sale now
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>Price Range</label>
+                                <div class="range-inputs">
+                                    <input type="number" id="minPrice" placeholder="Min" min="0">
+                                    <span>to</span>
+                                    <input type="number" id="maxPrice" placeholder="Max" min="0">
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label>Rating</label>
+                                <div class="rating-filter">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="4plus"> 4+ stars
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" value="3plus"> 3+ stars
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="filter-buttons">
+                            <button id="applyFilters" class="filter-button">Apply Filters</button>
+                            <button id="resetFilters" class="filter-button reset">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error and Loading Containers -->
+                <div id="errorContainer"></div>
+                <div id="loadingContainer"></div>
+
+                <!-- Events Grid -->
+                <div id="eventsContainer" class="events-grid"></div>
+            </div>
+
+            <!-- Venues View -->
+            <div id="venuesView" style="display: none;">
+                <div class="content-container">
+                    <div class="placeholder-message">
+                        <h2>Coming Soon</h2>
+                        <p>We're working on bringing you detailed information about music venues.</p>
+                        <p>Check back later for updates!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artists View -->
+            <div id="artistsView" style="display: none;">
+                <div class="content-container">
+                    <div class="placeholder-message">
+                        <h2>Coming Soon</h2>
+                        <p>We're working on bringing you profiles of your favorite artists.</p>
+                        <p>Check back later for updates!</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p>© 2024 Music Events. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
-
